@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"oe02_go_tam/models"
 	"os"
 	"time"
 )
@@ -62,7 +63,7 @@ func ConnectDB() {
 	sqlDB.SetMaxOpenConns(100)
 
 	DB = db
-	err = db.AutoMigrate()
+	err = db.AutoMigrate(models.User{}, models.Tour{}, models.Review{}, models.Payment{}, models.Booking{}, models.Like{}, models.Comment{}, models.BankAccount{})
 	if err != nil {
 		log.Fatalf("❌ AutoMigrate failed: %v", err)
 	}
