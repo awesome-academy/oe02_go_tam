@@ -1,0 +1,16 @@
+{
+  "auth.header.invalid": "Authorization header missing or malformed",
+  "auth.logout.success": "You have been logged out. Please delete token on client side",
+  "auth.email.exists": "Email already exists",
+  "auth.user.not_found": "User not found",
+  "auth.login.failed": "Login failed",
+  "auth.token.unexpected_method": "Unexpected signing method",
+  "auth.token.expired": "Token has expired",
+  "auth.token.invalid": "Invalid token",
+  "auth.token.invalid_claim": "Invalid token claim",
+  "auth.token.user_id_missing": "User ID not found in token",
+  "auth.token.role_missing": "Role not found in token",
+  "auth.password.mismatch": "Passwords do not match",
+  "config.env.load_failed": "Failed to load .env file",
+  "config.env.jwt_secret_missing": "JWT_SECRET not set in environment"
+}

@@ -1,0 +1,13 @@
+{
+  "auth.header.invalid": "Thiếu hoặc sai định dạng tiêu đề xác thực",
+  "auth.logout.success": "Bạn đã đăng xuất. Vui lòng xoá token trên phía client",
+  "auth.email.exists": "Email đã tồn tại",
+  "auth.user.not_found": "Không tìm thấy người dùng",
+  "auth.login.failed": "Đăng nhập thất bại",
+  "auth.token.unexpected_method": "Phương thức ký không hợp lệ",
+  "auth.token.expired": "Token đã hết hạn",
+  "auth.token.invalid": "Token không hợp lệ",
+  "auth.token.invalid_claim": "Thông tin xác thực của token không hợp lệ",
+  "auth.token.user_id_missing": "Không tìm thấy ID người dùng trong token",
+  "auth.token.role_missing": "Không tìm thấy vai trò trong token"
+}
