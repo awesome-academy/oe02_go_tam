@@ -10,7 +10,7 @@ type User struct {
 	Email      string `gorm:"size:100;uniqueIndex" json:"email"`
 	Password   string `gorm:"size:250" json:"password"`
 	AvatarURL  string `gorm:"size:250" json:"avatar_url"`
-	Role       string `gorm:"type:enum('admin','user')" json:"role"`
+	Role       string `gorm:"type:varchar(20);check:role IN ('admin','user');default:'user'" json:"role"`
 	Banned     bool   `gorm:"default:false" json:"banned"`
 	FacebookID string `gorm:"size:255" json:"facebook_id"`
 	GoogleID   string `gorm:"size:255" json:"google_id"`
