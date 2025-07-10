@@ -12,6 +12,7 @@ import (
 type AuthService interface {
 	Register(name, email, password string) (*models.User, error)
 	Login(email, password string) (string, *models.User, error)
+	GoogleLogin(name, email, googleID string) (string, *models.User, error)
 }
 
 type authService struct {
@@ -57,6 +58,41 @@ func (s *authService) Login(email, password string) (string, *models.User, error
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return "", nil, constant.LoginFailed
+	}
+
+	token, err := utils.GenerateToken(user.ID, user.Role)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return token, user, nil
+}
+
+func (s *authService) GoogleLogin(name, email, googleID string) (string, *models.User, error) {
+	user, err := s.repo.FindUserByEmail(email)
+	if err != nil && !errors.Is(err, constant.ErrUserNotFound) {
+		return "", nil, err
+	}
+
+	if user != nil {
+		if user.GoogleID == "" {
+			user.GoogleID = googleID
+			if err := s.repo.UpdateUser(user); err != nil {
+				return "", nil, err
+			}
+		} else if user.GoogleID != googleID {
+			return "", nil, constant.ErrGoogleIDMismatch
+		}
+	} else {
+		user = &models.User{
+			Name:     name,
+			Email:    email,
+			GoogleID: googleID,
+			Role:     "user",
+		}
+		if err := s.repo.CreateUser(user); err != nil {
+			return "", nil, err
+		}
 	}
 
 	token, err := utils.GenerateToken(user.ID, user.Role)

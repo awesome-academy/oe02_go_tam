@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth/gothic"
 	"net/http"
 	"oe02_go_tam/constant"
 	"oe02_go_tam/services"
@@ -79,5 +80,28 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	// Frontend should discard token
 	c.JSON(http.StatusOK, gin.H{
 		"message": constant.T("auth.logout.success"),
+	})
+}
+
+func (h *AuthHandler) GoogleCallback(c *gin.Context) {
+	googleUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, user, err := h.service.GoogleLogin(googleUser.Name, googleUser.Email, googleUser.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user": gin.H{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+		},
 	})
 }

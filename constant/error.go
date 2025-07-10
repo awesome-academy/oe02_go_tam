@@ -18,4 +18,5 @@ var (
 	ErrLoadEnvFailed        = errors.New("config.env.load_failed")
 	ErrJWTSecretNotSet      = errors.New("config.env.jwt_secret_missing")
 	ErrValidation           = errors.New("validation failed")
+	ErrGoogleIDMismatch     = errors.New(T("auth.google_id_mismatch"))
 )
