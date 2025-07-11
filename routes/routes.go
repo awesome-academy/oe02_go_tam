@@ -15,6 +15,9 @@ func SetupRouter() *gin.Engine {
 	authRepository := repositories.NewAuthRepository(database.DB)
 	authService := services.NewAuthService(authRepository)
 	authHandler := handlers.NewAuthHandler(authService)
+	userRepository := repositories.NewUserRepository(database.DB)
+	userService := services.NewUserService(userRepository)
+	userHandler := handlers.NewUserHandler(userService)
 
 	api := r.Group("/api")
 
@@ -23,6 +26,12 @@ func SetupRouter() *gin.Engine {
 	authGroup.POST("/register", authHandler.Register)
 	authGroup.POST("/login", authHandler.Login)
 	authGroup.POST("/logout", authHandler.Logout)
+
+	userGroup := api.Group("/users")
+	userGroup.Use(middlewares.RequestLogger())
+	userGroup.Use(middlewares.AuthMiddleware())
+	userGroup.GET("/me", userHandler.GetProfile)
+	userGroup.PATCH("/me", userHandler.UpdateProfile)
 
 	return r
 }
