@@ -30,3 +30,23 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func RequireRole(requiredRole string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		roleVal, exists := c.Get("role")
+		if !exists {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Role not found in token"})
+			c.Abort()
+			return
+		}
+
+		role, ok := roleVal.(string)
+		if !ok || role != requiredRole {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}

@@ -20,6 +20,14 @@ func SetupRouter() *gin.Engine {
 	userService := services.NewUserService(userRepository)
 	userHandler := handlers.NewUserHandler(userService)
 
+	tourRepo := repositories.NewTourRepository(database.DB)
+	tourService := services.NewTourService(tourRepo)
+	tourHandler := handlers.NewTourHandler(tourService)
+
+	reviewRepo := repositories.NewReviewRepository(database.DB)
+	reviewService := services.NewReviewService(reviewRepo)
+	reviewHandler := handlers.NewReviewHandler(reviewService)
+
 	api := r.Group("/api")
 
 	authGroup := api.Group("/auth")
@@ -38,6 +46,12 @@ func SetupRouter() *gin.Engine {
 	userGroup.Use(middlewares.AuthMiddleware())
 	userGroup.GET("/me", userHandler.GetProfile)
 	userGroup.PATCH("/me", userHandler.UpdateProfile)
+
+	tourGroup := api.Group("/tours")
+	tourGroup.Use(middlewares.RequestLogger())
+	tourGroup.GET("/", tourHandler.ListTours)
+	tourGroup.GET("/:id", tourHandler.GetTourDetail)
+	tourGroup.GET("/:id/reviews", reviewHandler.GetReviews)
 
 	return r
 }
