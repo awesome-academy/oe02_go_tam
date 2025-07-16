@@ -12,5 +12,7 @@
   "auth.token.role_missing": "Role not found in token",
   "auth.password.mismatch": "Passwords do not match",
   "config.env.load_failed": "Failed to load .env file",
-  "config.env.jwt_secret_missing": "JWT_SECRET not set in environment"
+  "config.env.jwt_secret_missing": "JWT_SECRET not set in environment",
+  "user.not_found": "User not found",
+  "user.update_failed": "Update failed"
 }
