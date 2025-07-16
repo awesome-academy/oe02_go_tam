@@ -10,6 +10,7 @@ import (
 type AuthRepository interface {
 	CreateUser(user *models.User) error
 	FindUserByEmail(email string) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 type authRepositoryImpl struct {
@@ -31,4 +32,8 @@ func (r *authRepositoryImpl) FindUserByEmail(email string) (*models.User, error)
 		return nil, constant.ErrUserNotFound
 	}
 	return &user, err
+}
+
+func (r *authRepositoryImpl) UpdateUser(user *models.User) error {
+	return r.db.Save(user).Error
 }

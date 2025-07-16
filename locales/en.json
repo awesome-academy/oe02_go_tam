@@ -4,6 +4,7 @@
   "auth.email.exists": "Email already exists",
   "auth.user.not_found": "User not found",
   "auth.login.failed": "Login failed",
+  "auth.google_id_mismatch": "Google account does not match the linked account.",
   "auth.token.unexpected_method": "Unexpected signing method",
   "auth.token.expired": "Token has expired",
   "auth.token.invalid": "Invalid token",

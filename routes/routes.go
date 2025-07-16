@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth/gothic"
 	"oe02_go_tam/database"
 	"oe02_go_tam/handlers"
 	"oe02_go_tam/middlewares"
@@ -26,6 +27,11 @@ func SetupRouter() *gin.Engine {
 	authGroup.POST("/register", authHandler.Register)
 	authGroup.POST("/login", authHandler.Login)
 	authGroup.POST("/logout", authHandler.Logout)
+	authGroup.GET("/google", func(c *gin.Context) {
+		c.Request.URL.RawQuery = "provider=google"
+		gothic.BeginAuthHandler(c.Writer, c.Request)
+	})
+	authGroup.GET("/google/callback", authHandler.GoogleCallback)
 
 	userGroup := api.Group("/users")
 	userGroup.Use(middlewares.RequestLogger())
