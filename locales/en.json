@@ -15,5 +15,10 @@
   "config.env.load_failed": "Failed to load .env file",
   "config.env.jwt_secret_missing": "JWT_SECRET not set in environment",
   "user.not_found": "User not found",
-  "user.update_failed": "Update failed"
+  "user.update_failed": "Update failed",
+  "review.tour_id_invalid": "Invalid tour ID",
+  "review.fetch_failed": "Failed to fetch reviews",
+  "tour.fetch_failed": "Cannot fetch tours",
+  "tour.id_invalid": "Invalid tour ID",
+  "tour.not_found": "Tour not found"
 }
