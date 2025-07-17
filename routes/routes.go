@@ -28,6 +28,14 @@ func SetupRouter() *gin.Engine {
 	reviewService := services.NewReviewService(reviewRepo)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 
+	commentRepo := repositories.NewCommentRepository(database.DB)
+	commentService := services.NewCommentService(commentRepo, reviewRepo)
+	commentHandler := handlers.NewCommentHandler(commentService)
+
+	likeRepo := repositories.NewLikeRepository(database.DB)
+	likeService := services.NewLikeService(likeRepo, reviewRepo)
+	likeHandler := handlers.NewLikeHandler(likeService)
+
 	api := r.Group("/api")
 
 	authGroup := api.Group("/auth")
@@ -52,6 +60,21 @@ func SetupRouter() *gin.Engine {
 	tourGroup.GET("/", tourHandler.ListTours)
 	tourGroup.GET("/:id", tourHandler.GetTourDetail)
 	tourGroup.GET("/:id/reviews", reviewHandler.GetReviews)
+
+	reviewGroup := api.Group("/reviews")
+	reviewGroup.Use(middlewares.AuthMiddleware())
+	reviewGroup.POST("", reviewHandler.CreateReview)
+	reviewGroup.GET("/:id", reviewHandler.GetOwnReview)
+	reviewGroup.PUT("/:id", reviewHandler.UpdateReview)
+	reviewGroup.DELETE("/:id", reviewHandler.DeleteReview)
+
+	commentGroup := api.Group("/comments")
+	commentGroup.Use(middlewares.AuthMiddleware())
+	commentGroup.POST("", commentHandler.CreateComment)
+
+	likeGroup := api.Group("/likes")
+	likeGroup.Use(middlewares.AuthMiddleware())
+	likeGroup.POST("", likeHandler.LikeReview)
 
 	return r
 }
