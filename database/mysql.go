@@ -63,7 +63,7 @@ func ConnectDB() {
 	sqlDB.SetMaxOpenConns(100)
 
 	DB = db
-	err = db.AutoMigrate(models.User{}, models.Tour{}, models.Review{}, models.Payment{}, models.Booking{}, models.Like{}, models.Comment{}, models.BankAccount{})
+	err = db.AutoMigrate(models.User{}, models.Tour{}, models.Review{}, models.Payment{}, models.Booking{}, models.Like{}, models.Comment{}, models.BankAccount{}, models.PaymentTransaction{})
 	if err != nil {
 		log.Fatalf("❌ AutoMigrate failed: %v", err)
 	}
