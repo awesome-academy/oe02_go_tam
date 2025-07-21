@@ -47,3 +47,15 @@ func MapReviewToResponse(r models.Review) responses.ReviewResponse {
 		Likes:    likeRes,
 	}
 }
+
+func MapCommentToResponse(c models.Comment) responses.CommentResponse {
+	return responses.CommentResponse{
+		ID: c.ID,
+		User: responses.UserMiniResponse{
+			ID:    c.User.ID,
+			Name:  c.User.Name,
+			Email: c.User.Email,
+		},
+		Content: c.Content,
+	}
+}
