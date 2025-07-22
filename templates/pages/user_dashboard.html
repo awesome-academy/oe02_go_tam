@@ -1,0 +1,86 @@
+{{ define "user_dashboard.html" }}
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+<body class="bg-gray-100 font-sans">
+<div class="flex">
+    <!-- Sidebar -->
+    {{ template "sidebar.html" . }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">{{ T "admin.users.title" }}</h1>
+        </div>
+
+        <!-- Search Form -->
+        <div class="mb-4 flex justify-between items-center">
+            <form method="GET" action="/admin/users" class="flex gap-2">
+                <input type="text" name="search" placeholder="Search name/email..."
+                       value="{{.Search}}"
+                       class="border border-gray-300 rounded-lg px-3 py-1 text-sm" />
+                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">{{ T "admin.users.search_button" }}</button>
+            </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-white shadow-md rounded-xl overflow-hidden">
+            <table class="min-w-full text-left">
+                <thead class="bg-gray-100">
+                <tr class="text-sm font-semibold text-gray-600">
+                    <th class="py-3 px-6">{{ T "admin.users.table.customer" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.users.table.role" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.users.table.status" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.users.table.created_at" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.users.table.actions" }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Users}}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-6 flex items-center space-x-3">
+                        <img src="{{.AvatarURL}}" alt="avatar" class="w-10 h-10 rounded-full">
+                        <div>
+                            <div class="font-semibold text-gray-800">{{.Name}}</div>
+                            <div class="text-sm text-gray-500">{{.Email}}</div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-6">
+                        <div class="text-gray-800">{{.Role}}</div>
+                    </td>
+                    <td class="py-3 px-6">
+                        {{if .Banned}}
+                        <span class="bg-red-400 text-white text-xs px-2 py-1 rounded-full">{{ T "admin.users.table.inactive" }}</span>
+                        {{else}}
+                        <span class="bg-green-400 text-white text-xs px-2 py-1 rounded-full">{{ T "admin.users.table.active" }}</span>
+                        {{end}}
+                    </td>
+                    <td class="py-3 px-6 text-sm text-gray-600">{{.CreatedAt.Format "02/01/2006"}}</td>
+                    <td class="py-3 px-6 space-x-2">
+                        <a href="/admin/users/{{.ID}}" class="text-blue-500 hover:underline text-sm">{{ T "admin.users.table.view" }}</a>
+                        <a href="/admin/users/{{.ID}}/ban" class="text-yellow-500 hover:underline text-sm">{{if .Banned}}{{ T "admin.users.table.unban" }}{{else}}{{ T "admin.users.table.ban" }}{{end}}</a>
+                        <a href="/admin/users/{{.ID}}/delete" class="text-red-500 hover:underline text-sm">{{ T "admin.users.table.delete" }}</a>
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-end items-center space-x-2">
+            {{if gt .Pagination.Page 1}}
+            <a href="?page={{dec .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.users.pagination.previous" }}</a>
+            {{end}}
+
+            <span class="text-sm text-gray-600">{{ T "admin.tours.pagination.page" }} {{.Pagination.Page}}/{{.Pagination.TotalPages}}</span>
+
+            {{if lt .Pagination.Page .Pagination.TotalPages}}
+            <a href="?page={{inc .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.users.pagination.next" }}</a>
+            {{end}}
+        </div>
+    </div>
+</div>
+</body>
+</html>
+{{ end }}

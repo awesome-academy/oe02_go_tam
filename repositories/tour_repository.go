@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"oe02_go_tam/constant"
 	"oe02_go_tam/models"
@@ -11,6 +12,11 @@ import (
 type TourRepository interface {
 	GetByID(id uint) (*models.Tour, error)
 	GetAllWithFilters(filters map[string]string, page, size int) ([]models.Tour, error)
+	FindAllWithSearch(search string, page, limit int) ([]models.Tour, int64, error)
+	FindByID(id uint) (*models.Tour, error)
+	Create(tour *models.Tour) error
+	Update(tour *models.Tour) error
+	Delete(id uint) error
 }
 
 type tourRepositoryImpl struct {
@@ -62,7 +68,7 @@ func (r *tourRepositoryImpl) GetAllWithFilters(filters map[string]string, page, 
 
 func (r *tourRepositoryImpl) GetByID(id uint) (*models.Tour, error) {
 	var tour models.Tour
-	
+
 	err := r.db.Preload("Creator").
 		Preload("Bookings").
 		Preload("Reviews").
@@ -79,4 +85,75 @@ func (r *tourRepositoryImpl) GetByID(id uint) (*models.Tour, error) {
 	}
 
 	return &tour, nil
+}
+
+func (r *tourRepositoryImpl) FindAllWithSearch(search string, page, limit int) ([]models.Tour, int64, error) {
+	var tours []models.Tour
+	var total int64
+
+	if page < 1 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+
+	query := r.db.Model(&models.Tour{})
+	if search != "" {
+		query = query.Where("title LIKE ? OR location LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+	query.Count(&total)
+	offset := (page - 1) * limit
+	err := query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&tours).Error
+	return tours, total, err
+}
+
+func (r *tourRepositoryImpl) FindByID(id uint) (*models.Tour, error) {
+	var tour models.Tour
+	err := r.db.First(&tour, id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &tour, nil
+}
+
+func (r *tourRepositoryImpl) Create(tour *models.Tour) error {
+	return r.db.Create(tour).Error
+}
+
+func (r *tourRepositoryImpl) Update(tour *models.Tour) error {
+	return r.db.Save(tour).Error
+}
+
+func (r *tourRepositoryImpl) Delete(id uint) error {
+	var booking models.Booking
+	if err := r.db.Select("id").Where("tour_id = ?", id).Limit(1).First(&booking).Error; err == nil {
+		return errors.New("cannot delete tour: has related bookings")
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	var review models.Review
+	if err := r.db.Select("id").Where("tour_id = ?", id).Limit(1).First(&review).Error; err == nil {
+		return errors.New("cannot delete tour: has related reviews")
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	
+	var comment models.Comment
+	if err := r.db.Raw(`
+		SELECT comments.id
+		FROM comments
+		JOIN reviews ON comments.review_id = reviews.id
+		WHERE reviews.tour_id = ?
+		LIMIT 1`, id).Scan(&comment).Error; err == nil && comment.ID != 0 {
+		return errors.New("cannot delete tour: has related comments via reviews")
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	return r.db.Delete(&models.Tour{}, id).Error
 }

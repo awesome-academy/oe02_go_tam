@@ -14,6 +14,10 @@ type BookingRepository interface {
 	GetByIDAndUser(id, userID uint) (*models.Booking, error)
 	TotalBookedSeats(tourID uint) (int, error)
 	GetByID(bookingID uint) (*models.Booking, error)
+	FindAllWithUserAndTour(search string, page, limit int) ([]models.Booking, int64, error)
+	FindByIDWithUserAndTour(id uint) (*models.Booking, error)
+	Delete(id uint) error
+	GetCompletedBookings(search string, page, limit, month, year int) ([]models.Booking, int64, error)
 }
 
 type bookingRepositoryImpl struct {
@@ -63,4 +67,77 @@ func (r *bookingRepositoryImpl) GetByID(bookingID uint) (*models.Booking, error)
 		return nil, err
 	}
 	return &booking, nil
+}
+
+func (r *bookingRepositoryImpl) FindAllWithUserAndTour(search string, page, limit int) ([]models.Booking, int64, error) {
+	var bookings []models.Booking
+	var total int64
+
+	query := r.db.Model(&models.Booking{}).
+		Preload("User").
+		Preload("Tour").
+		Joins("JOIN users ON users.id = bookings.user_id").
+		Joins("JOIN tours ON tours.id = bookings.tour_id")
+
+	if search != "" {
+		query = query.Where("users.name LIKE ? OR tours.title LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	err := query.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err = query.Offset(offset).Limit(limit).Order("bookings.created_at DESC").Find(&bookings).Error
+	return bookings, total, err
+}
+
+func (r *bookingRepositoryImpl) FindByIDWithUserAndTour(id uint) (*models.Booking, error) {
+	var booking models.Booking
+	err := r.db.Preload("User").Preload("Tour").First(&booking, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &booking, nil
+}
+
+func (r *bookingRepositoryImpl) Delete(id uint) error {
+	return r.db.Delete(&models.Booking{}, id).Error
+}
+
+func (r *bookingRepositoryImpl) GetCompletedBookings(search string, page, limit, month, year int) ([]models.Booking, int64, error) {
+	var bookings []models.Booking
+	var total int64
+
+	query := r.db.Model(&models.Booking{}).
+		Where("status = ?", "completed").
+		Preload("User").
+		Preload("Tour")
+
+	if search != "" {
+		query = query.Joins("JOIN users ON users.id = bookings.user_id").
+			Joins("JOIN tours ON tours.id = bookings.tour_id").
+			Where("users.name LIKE ? OR tours.title LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	if month > 0 {
+		query = query.Where("MONTH(booking_date) = ?", month)
+	}
+
+	if year > 0 {
+		query = query.Where("YEAR(booking_date) = ?", year)
+	}
+
+	err := query.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err = query.Offset(offset).Limit(limit).Order("booking_date DESC").Find(&bookings).Error
+	return bookings, total, err
 }

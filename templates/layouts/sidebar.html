@@ -1,0 +1,41 @@
+{{ define "sidebar.html" }}
+<div class="w-64 bg-white h-screen shadow-md p-6">
+  <h2 class="text-lg font-bold mb-6">Soft UI Dashboard 3</h2>
+  <nav class="space-y-2">
+    <a href="/admin/users"
+       class="block px-4 py-2 rounded-lg {{if eq .CurrentPage "users"}}text-white bg-orange-500{{else}}text-gray-700 hover:bg-gray-200{{end}}">
+    {{ T "admin.sidebar.users" }}
+    </a>
+
+    <a href="/admin/tours"
+       class="block px-4 py-2 rounded-lg {{if eq .CurrentPage "tours"}}text-white bg-orange-500{{else}}text-gray-700 hover:bg-gray-200{{end}}">
+    {{ T "admin.sidebar.tours" }}
+    </a>
+
+    <a href="/admin/bookings"
+       class="block px-4 py-2 rounded-lg {{if eq .CurrentPage "bookings"}}text-white bg-orange-500{{else}}text-gray-700 hover:bg-gray-200{{end}}">
+    {{ T "admin.sidebar.bookings" }}
+    </a>
+
+    <a href="/admin/reviews"
+       class="block px-4 py-2 rounded-lg {{if eq .CurrentPage "reviews"}}text-white bg-orange-500{{else}}text-gray-700 hover:bg-gray-200{{end}}">
+    {{ T "admin.sidebar.reviews" }}
+    </a>
+
+    <a href="/admin/revenues"
+       class="block px-4 py-2 rounded-lg {{if eq .CurrentPage "revenues"}}text-white bg-orange-500{{else}}text-gray-700 hover:bg-gray-200{{end}}">
+    {{ T "admin.sidebar.revenues" }}
+    </a>
+  </nav>
+
+  <div class="mt-8">
+    <p class="text-sm text-gray-400 uppercase font-semibold mb-2">{{ T "admin.sidebar.account_page" }}</p>
+    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg">{{ T "admin.sidebar.profile" }}</a>
+    <form method="POST" action="/admin/logout">
+      <button type="submit" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg">
+        {{ T "admin.sidebar.logout" }}
+      </button>
+    </form>
+  </div>
+</div>
+{{ end }}

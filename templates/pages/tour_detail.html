@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+<body class="bg-gray-100 p-8">
+<h1 class="text-2xl font-bold mb-4">Tour Detail</h1>
+<div class="bg-white p-4 shadow rounded">
+    <p><strong>{{ T "admin.tours.edit.form.title" }}:</strong> {{.Tour.Title}}</p>
+    <p><strong>{{ T "admin.tours.edit.form.description" }}:</strong> {{.Tour.Description}}</p>
+    <p><strong>{{ T "admin.tours.edit.form.location" }}:</strong> {{.Tour.Location}}</p>
+    <p><strong>{{ T "admin.tours.edit.form.start_date" }}:</strong> {{.Tour.StartDate.Format "02/01/2006"}}</p>
+    <p><strong>{{ T "admin.tours.edit.form.end_date" }}:</strong> {{.Tour.EndDate.Format "02/01/2006"}}</p>
+    <p><strong>{{ T "admin.tours.edit.form.price" }}:</strong> ${{printf "%.2f" .Tour.Price}}</p>
+    <p><strong>{{ T "admin.tours.edit.form.seats" }}:</strong> {{.Tour.Seats}}</p>
+</div>
+</body>
+</html>
