@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
+	"oe02_go_tam/config"
 	"oe02_go_tam/database"
 	"oe02_go_tam/handlers"
 	"oe02_go_tam/middlewares"
@@ -35,6 +36,15 @@ func SetupRouter() *gin.Engine {
 	likeRepo := repositories.NewLikeRepository(database.DB)
 	likeService := services.NewLikeService(likeRepo, reviewRepo)
 	likeHandler := handlers.NewLikeHandler(likeService)
+
+	bookingRepo := repositories.NewBookingRepository(database.DB)
+	bookingService := services.NewBookingService(bookingRepo, tourRepo)
+	bookingHandler := handlers.NewBookingHandler(bookingService)
+
+	transactionRepo := repositories.NewTransactionRepository(database.DB)
+	vnpayConfig := config.GetVnpayConfig()
+	vnpayService := services.NewVnpayService(bookingRepo, tourRepo, transactionRepo, vnpayConfig)
+	vnpayHandler := handlers.NewVnpayHandler(vnpayService)
 
 	api := r.Group("/api")
 
@@ -75,6 +85,16 @@ func SetupRouter() *gin.Engine {
 	likeGroup := api.Group("/likes")
 	likeGroup.Use(middlewares.AuthMiddleware())
 	likeGroup.POST("", likeHandler.LikeReview)
+
+	bookingGroup := api.Group("/bookings")
+	bookingGroup.Use(middlewares.RequestLogger())
+	bookingGroup.Use(middlewares.AuthMiddleware())
+	bookingGroup.POST("/", bookingHandler.BookTour)
+	bookingGroup.DELETE("/:id", bookingHandler.CancelBooking)
+
+	paymentGroup := api.Group("/payments")
+	paymentGroup.POST("/vnpay", middlewares.AuthMiddleware(), vnpayHandler.CreatePaymentUrl)
+	paymentGroup.GET("/vnpay/callback", vnpayHandler.VnpayReturn)
 
 	return r
 }
