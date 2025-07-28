@@ -1,0 +1,74 @@
+{{ define "admin_tours.html" }}
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+<body class="bg-gray-100 font-sans">
+<div class="flex">
+    <!-- Sidebar -->
+    {{ template "sidebar.html" . }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8">
+        <div class="mb-6 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">{{ T "admin.tours.title" }}</h1>
+            <a href="/admin/tours/new" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600">
+                {{ T "admin.tours.new" }}</a>
+        </div>
+
+        <!-- Search Form -->
+        <div class="mb-4 flex justify-between items-center">
+            <form method="GET" action="/admin/tours" class="flex gap-2">
+                <input type="text" name="search" placeholder="Search title/location..."
+                       value="{{.Search}}"
+                       class="border border-gray-300 rounded-lg px-3 py-1 text-sm" />
+                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">{{ T "admin.tours.search_button" }}</button>
+            </form>
+        </div>
+
+        <!-- Tours Table -->
+        <div class="bg-white shadow-md rounded-xl overflow-hidden">
+            <table class="min-w-full text-left">
+                <thead class="bg-gray-100">
+                <tr class="text-sm font-semibold text-gray-600">
+                    <th class="py-3 px-6">{{ T "admin.tours.table.title" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.tours.table.location" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.tours.table.start_date" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.tours.table.price" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.tours.table.actions" }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Tours}}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-6">{{.Title}}</td>
+                    <td class="py-3 px-6">{{.Location}}</td>
+                    <td class="py-3 px-6 text-sm text-gray-600">{{.StartDate.Format "02/01/2006"}}</td>
+                    <td class="py-3 px-6">${{printf "%.2f" .Price}}</td>
+                    <td class="py-3 px-6 space-x-2">
+                        <a href="/admin/tours/{{.ID}}" class="text-blue-500 hover:underline text-sm">{{ T "admin.tours.table.view" }}</a>
+                        <a href="/admin/tours/{{.ID}}/edit" class="text-yellow-500 hover:underline text-sm">{{ T "admin.tours.table.edit" }}</a>
+                        <a href="/admin/tours/{{.ID}}/delete" class="text-red-500 hover:underline text-sm">{{ T "admin.tours.table.delete" }}</a>
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-end items-center space-x-2">
+            {{if gt .Pagination.Page 1}}
+            <a href="?page={{dec .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.tours.pagination.previous" }}</a>
+            {{end}}
+
+            <span class="text-sm text-gray-600">{{ T "admin.tours.pagination.page" }} {{.Pagination.Page}}/{{.Pagination.TotalPages}}</span>
+
+            {{if lt .Pagination.Page .Pagination.TotalPages}}
+            <a href="?page={{inc .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.tours.pagination.next" }}</a>
+            {{end}}
+        </div>
+    </div>
+</div>
+</body>
+</html>
+{{ end }}

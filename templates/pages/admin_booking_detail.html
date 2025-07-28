@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+<body class="bg-gray-100 p-10 font-sans">
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ T "admin.bookings.detail.title" }}</h1>
+
+    <div class="space-y-4 text-sm text-gray-700">
+        <div>
+            <strong>{{ T "admin.bookings.detail.customer" }}:</strong>
+            {{.Booking.User.Name}} ({{.Booking.User.Email}})
+        </div>
+        <div>
+            <strong>{{ T "admin.bookings.detail.tour" }}:</strong>
+            {{.Booking.Tour.Title}} - {{.Booking.Tour.Location}}
+        </div>
+        <div>
+            <strong>{{ T "admin.bookings.detail.seats" }}:</strong>
+            {{.Booking.NumberOfSeats}}
+        </div>
+        <div>
+            <strong>{{ T "admin.bookings.detail.total_price" }}:</strong>
+            ${{printf "%.2f" .Booking.TotalPrice}}
+        </div>
+        <div>
+            <strong>{{ T "admin.bookings.detail.date" }}:</strong>
+            {{.Booking.BookingDate.Format "02/01/2006"}}
+        </div>
+        <div>
+            <strong>{{ T "admin.bookings.detail.status" }}:</strong>
+            <span class="px-2 py-1 rounded-full text-white text-xs
+          {{if eq .Booking.Status "completed"}}bg-green-500
+            {{else if eq .Booking.Status "pending"}}bg-yellow-400
+            {{else if eq .Booking.Status "cancelled"}}bg-red-500
+            {{else}}bg-gray-500{{end}}">
+            {{.Booking.Status | title}}
+            </span>
+        </div>
+    </div>
+
+    <div class="mt-6 flex space-x-4">
+        <a href="/admin/bookings" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm text-gray-800">
+            {{ T "admin.bookings.detail.back" }}
+        </a>
+    </div>
+</div>
+</body>
+</html>

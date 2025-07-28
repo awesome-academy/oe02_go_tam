@@ -1,0 +1,86 @@
+{{ define "admin_bookings.html" }}
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+<body class="bg-gray-100 font-sans">
+<div class="flex">
+  <!-- Sidebar -->
+  {{ template "sidebar.html" . }}
+
+  <!-- Main Content -->
+  <div class="flex-1 p-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">{{ T "admin.bookings.title" }}</h1>
+    </div>
+
+    <!-- Search Form -->
+    <div class="mb-4 flex justify-between items-center">
+      <form method="GET" action="/admin/bookings" class="flex gap-2">
+        <input type="text" name="search" placeholder="{{ T "admin.bookings.search_placeholder" }}"
+        value="{{.Search}}"
+        class="border border-gray-300 rounded-lg px-3 py-1 text-sm" />
+        <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">{{ T "admin.bookings.search_button" }}</button>
+      </form>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="bg-white shadow-md rounded-xl overflow-hidden">
+      <table class="min-w-full text-left">
+        <thead class="bg-gray-100">
+        <tr class="text-sm font-semibold text-gray-600">
+          <th class="py-3 px-6">{{ T "admin.bookings.table.customer" }}</th>
+          <th class="py-3 px-6">{{ T "admin.bookings.table.tour" }}</th>
+          <th class="py-3 px-6">{{ T "admin.bookings.table.seats" }}</th>
+          <th class="py-3 px-6">{{ T "admin.bookings.table.total_price" }}</th>
+          <th class="py-3 px-6">{{ T "admin.bookings.table.date" }}</th>
+          <th class="py-3 px-6">{{ T "admin.bookings.table.status" }}</th>
+          <th class="py-3 px-6">{{ T "admin.bookings.table.actions" }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Bookings}}
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-3 px-6">
+            <div class="text-sm font-medium text-gray-800">{{.User.Name}}</div>
+            <div class="text-sm text-gray-500">{{.User.Email}}</div>
+          </td>
+          <td class="py-3 px-6 text-sm text-gray-700">{{.Tour.Title}}</td>
+          <td class="py-3 px-6">{{.NumberOfSeats}}</td>
+          <td class="py-3 px-6">${{printf "%.2f" .TotalPrice}}</td>
+          <td class="py-3 px-6 text-sm text-gray-600">{{.BookingDate.Format "02/01/2006"}}</td>
+          <td class="py-3 px-6">
+                        <span class="text-xs px-2 py-1 rounded-full
+                            {{if eq .Status "completed"}}bg-green-500 text-white
+            {{else if eq .Status "pending"}}bg-yellow-400 text-white
+            {{else if eq .Status "cancelled"}}bg-red-500 text-white
+            {{else}}bg-gray-400 text-white{{end}}">
+            {{.Status | title}}
+            </span>
+          </td>
+          <td class="py-3 px-6 space-x-2">
+            <a href="/admin/bookings/{{.ID}}" class="text-blue-500 hover:underline text-sm">{{ T "admin.bookings.table.view" }}</a>
+            <a href="/admin/bookings/{{.ID}}/delete" class="text-red-500 hover:underline text-sm">{{ T "admin.bookings.table.delete" }}</a>
+          </td>
+        </tr>
+        {{end}}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-4 flex justify-end items-center space-x-2">
+      {{if gt .Pagination.Page 1}}
+      <a href="?page={{dec .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.bookings.pagination.previous" }}</a>
+      {{end}}
+
+      <span class="text-sm text-gray-600">{{ T "admin.bookings.pagination.page" }} {{.Pagination.Page}}/{{.Pagination.TotalPages}}</span>
+
+      {{if lt .Pagination.Page .Pagination.TotalPages}}
+      <a href="?page={{inc .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.bookings.pagination.next" }}</a>
+      {{end}}
+    </div>
+  </div>
+</div>
+</body>
+</html>
+{{ end }}

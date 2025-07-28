@@ -13,6 +13,9 @@ type ReviewRepository interface {
 	Update(review *models.Review) error
 	Delete(review *models.Review) error
 	Exists(reviewID uint) (bool, error)
+	FindAllWithUserAndTour(search string, page, limit int) ([]models.Review, int64, error)
+	FindByIDWithRelations(id uint) (*models.Review, error)
+	DeleteByID(id uint) error
 }
 
 type reviewRepositoryImpl struct {
@@ -63,4 +66,48 @@ func (r *reviewRepositoryImpl) Exists(reviewID uint) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (r *reviewRepositoryImpl) FindAllWithUserAndTour(search string, page, limit int) ([]models.Review, int64, error) {
+	var reviews []models.Review
+	var total int64
+
+	query := r.db.Model(&models.Review{}).
+		Preload("User").
+		Preload("Tour").
+		Preload("Comments").
+		Preload("Likes").
+		Joins("JOIN users ON users.id = reviews.user_id").
+		Joins("JOIN tours ON tours.id = reviews.tour_id")
+
+	if search != "" {
+		query = query.Where("users.name LIKE ? OR tours.title LIKE ? OR reviews.content LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err := query.Order("reviews.created_at DESC").Offset(offset).Limit(limit).Find(&reviews).Error
+	return reviews, total, err
+}
+
+func (r *reviewRepositoryImpl) FindByIDWithRelations(id uint) (*models.Review, error) {
+	var review models.Review
+	err := r.db.Preload("User").
+		Preload("Tour").
+		Preload("Comments.User").
+		Preload("Comments.Replies").
+		Preload("Likes").
+		First(&review, id).Error
+
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	return &review, err
+}
+
+func (r *reviewRepositoryImpl) DeleteByID(id uint) error {
+	return r.db.Delete(&models.Review{}, id).Error
 }

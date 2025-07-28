@@ -3,21 +3,27 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"oe02_go_tam/constant"
 	"oe02_go_tam/utils"
 	"strings"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var tokenString string
+
 		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": constant.T("auth.header.invalid")})
-			c.Abort()
-			return
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			tok, err := c.Cookie("admin_token")
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token missing"})
+				c.Abort()
+				return
+			}
+			tokenString = tok
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		userID, role, err := utils.ParseToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

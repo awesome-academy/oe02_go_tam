@@ -1,0 +1,73 @@
+{{ define "admin_revenue.html" }}
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+<body class="bg-gray-100 font-sans">
+<div class="flex">
+    <!-- Sidebar -->
+    {{ template "sidebar.html" . }}
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">{{ T "admin.revenue.title" }}</h1>
+        </div>
+
+        <!-- Search Form -->
+        <div class="mb-4 flex justify-between items-center">
+            <form method="GET" action="/admin/revenues" class="flex gap-2">
+                <input type="text" name="search" placeholder="{{ T "admin.revenue.search_placeholder" }}" value="{{.Search}}" class="border border-gray-300 rounded-lg px-3 py-1 text-sm" />
+                <input type="number" name="month" placeholder="Month"
+                       value="{{.Month}}" class="border border-gray-300 rounded-lg px-3 py-1 text-sm w-24" />
+                <input type="number" name="year" placeholder="Year"
+                       value="{{.Year}}" class="border border-gray-300 rounded-lg px-3 py-1 text-sm w-28" />
+                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">{{ T "admin.revenue.search_button" }}</button>
+            </form>
+        </div>
+
+        <!-- Revenue Table -->
+        <div class="bg-white shadow-md rounded-xl overflow-hidden">
+            <table class="min-w-full text-left">
+                <thead class="bg-gray-100">
+                <tr class="text-sm font-semibold text-gray-600">
+                    <th class="py-3 px-6">{{ T "admin.revenue.table.customer" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.revenue.table.tour" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.revenue.table.seats" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.revenue.table.total_price" }}</th>
+                    <th class="py-3 px-6">{{ T "admin.revenue.table.date" }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Bookings}}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-6">
+                        <div class="text-sm font-medium text-gray-800">{{.User.Name}}</div>
+                        <div class="text-sm text-gray-500">{{.User.Email}}</div>
+                    </td>
+                    <td class="py-3 px-6 text-sm text-gray-700">{{.Tour.Title}}</td>
+                    <td class="py-3 px-6">{{.NumberOfSeats}}</td>
+                    <td class="py-3 px-6 font-semibold text-green-600">${{printf "%.2f" .TotalPrice}}</td>
+                    <td class="py-3 px-6 text-sm text-gray-600">{{.BookingDate.Format "02/01/2006"}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-end items-center space-x-2">
+            {{if gt .Pagination.Page 1}}
+            <a href="?page={{dec .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.revenue.pagination.previous" }}</a>
+            {{end}}
+
+            <span class="text-sm text-gray-600">{{ T "admin.revenue.pagination.page" }} {{.Pagination.Page}}/{{.Pagination.TotalPages}}</span>
+
+            {{if lt .Pagination.Page .Pagination.TotalPages}}
+            <a href="?page={{inc .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.revenue.pagination.next" }}</a>
+            {{end}}
+        </div>
+    </div>
+</div>
+</body>
+</html>
+{{ end }}
