@@ -17,6 +17,16 @@ func NewVnpayHandler(service services.VnpayService) *VnpayHandler {
 	return &VnpayHandler{service}
 }
 
+// CreatePaymentUrl godoc
+// @Summary Create VNPAY payment URL
+// @Description Generates a VNPAY payment URL for a given booking
+// @Tags Payment
+// @Produce json
+// @Param booking_id query int true "Booking ID"
+// @Success 200 {object} map[string]string "payment_url"
+// @Failure 400 {object} map[string]string "Invalid booking ID or payment generation failed"
+// @Security ApiKeyAuth
+// @Router /api/payment/create-url [get]
 func (h *VnpayHandler) CreatePaymentUrl(c *gin.Context) {
 	bookingID, err := strconv.Atoi(c.Query("booking_id"))
 	if err != nil || bookingID <= 0 {
@@ -35,6 +45,16 @@ func (h *VnpayHandler) CreatePaymentUrl(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"payment_url": url})
 }
 
+// VnpayReturn godoc
+// @Summary VNPAY return callback
+// @Description Callback endpoint for VNPAY to update transaction status
+// @Tags Payment
+// @Produce json
+// @Success 302 {string} string "Redirect to frontend after successful payment"
+// @Failure 400 {object} map[string]string "Invalid signature or failed payment"
+// @Failure 404 {object} map[string]string "Transaction or booking not found"
+// @Failure 500 {object} map[string]string "Failed to update booking"
+// @Router /api/payment/vnpay-return [get]
 func (h *VnpayHandler) VnpayReturn(c *gin.Context) {
 	params := c.Request.URL.Query()
 

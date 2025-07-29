@@ -19,6 +19,20 @@ func NewLikeHandler(service services.LikeService) *LikeHandler {
 	return &LikeHandler{service}
 }
 
+// LikeReview godoc
+// @Summary Like a review
+// @Description Like a review by review ID. User can only like once.
+// @Tags Like
+// @Accept json
+// @Produce json
+// @Param body body LikeRequest true "Like Review Payload"
+// @Success 200 {object} map[string]string "Like success message"
+// @Failure 400 {object} map[string]string "Bad request or already liked"
+// @Failure 401 {object} map[string]string "Unauthorized (user not logged in)"
+// @Failure 404 {object} map[string]string "Review not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security ApiKeyAuth
+// @Router /api/likes [post]
 func (h *LikeHandler) LikeReview(c *gin.Context) {
 	var req LikeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

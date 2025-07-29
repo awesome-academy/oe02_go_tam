@@ -24,6 +24,20 @@ func NewCommentHandler(service services.CommentService) *CommentHandler {
 	return &CommentHandler{service}
 }
 
+// CreateComment godoc
+// @Summary Create a new comment for a review
+// @Description Create a comment or reply (nested) on a review. ParentID is optional for nested comments.
+// @Tags Comment
+// @Accept json
+// @Produce json
+// @Param body body CreateCommentRequest true "Create Comment Payload"
+// @Success 201 {object} map[string]interface{} "Returns the created comment data"
+// @Failure 400 {object} map[string]string "Bad request, invalid input or empty content"
+// @Failure 401 {object} map[string]string "Unauthorized (user not logged in)"
+// @Failure 404 {object} map[string]string "Review or Parent comment not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security ApiKeyAuth
+// @Router /api/comments [post]
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var req CreateCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

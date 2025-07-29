@@ -21,6 +21,20 @@ type BookTourRequest struct {
 	NumberOfSeats int  `json:"number_of_seats" binding:"required"`
 }
 
+// BookTour godoc
+// @Summary Book a tour
+// @Description Book a tour with a given number of seats
+// @Tags Booking
+// @Accept json
+// @Produce json
+// @Param body body BookTourRequest true "Booking request payload"
+// @Success 201 {object} map[string]interface{} "Booking created successfully"
+// @Failure 400 {object} map[string]string "Bad request or not enough seats or already booked"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Tour not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security ApiKeyAuth
+// @Router /api/bookings [post]
 func (h *BookingHandler) BookTour(c *gin.Context) {
 	var req BookTourRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -62,6 +76,19 @@ func (h *BookingHandler) BookTour(c *gin.Context) {
 	}
 }
 
+// CancelBooking godoc
+// @Summary Cancel a booking
+// @Description Cancel a booking by ID for the authenticated user
+// @Tags Booking
+// @Produce json
+// @Param id path int true "Booking ID"
+// @Success 200 {object} map[string]string "Booking cancelled successfully"
+// @Failure 400 {object} map[string]string "Invalid booking ID or already cancelled"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Booking not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security ApiKeyAuth
+// @Router /api/bookings/{id}/cancel [post]
 func (h *BookingHandler) CancelBooking(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)

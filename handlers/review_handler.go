@@ -19,6 +19,16 @@ func NewReviewHandler(s services.ReviewService) *ReviewHandler {
 	return &ReviewHandler{s}
 }
 
+// GetReviews godoc
+// @Summary Get reviews for a tour
+// @Description Retrieve all reviews of a specific tour by tour ID
+// @Tags Review
+// @Produce json
+// @Param id path int true "Tour ID"
+// @Success 200 {array} responses.ReviewResponse
+// @Failure 400 {object} map[string]string "Invalid tour ID"
+// @Failure 500 {object} map[string]string "Failed to fetch reviews"
+// @Router /api/tours/{id}/reviews [get]
 func (h *ReviewHandler) GetReviews(c *gin.Context) {
 	tourIDStr := c.Param("id")
 	tourID, err := strconv.Atoi(tourIDStr)
@@ -47,6 +57,19 @@ type ReviewRequest struct {
 	Content string `json:"content" binding:"required"`
 }
 
+// CreateReview godoc
+// @Summary Create a new review
+// @Description Create a review for a tour. Requires authentication.
+// @Tags Review
+// @Accept json
+// @Produce json
+// @Param body body ReviewRequest true "Review payload"
+// @Success 201 {object} responses.ReviewResponse
+// @Failure 400 {object} map[string]string "Invalid input"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Create review failed"
+// @Security ApiKeyAuth
+// @Router /api/reviews [post]
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	var req ReviewRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -66,6 +89,18 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	c.JSON(http.StatusCreated, reviewResponse)
 }
 
+// GetOwnReview godoc
+// @Summary Get own review by ID
+// @Description Get the review written by the authenticated user by review ID
+// @Tags Review
+// @Produce json
+// @Param id path int true "Review ID"
+// @Success 200 {object} responses.ReviewResponse
+// @Failure 400 {object} map[string]string "Invalid review ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Review not found"
+// @Security ApiKeyAuth
+// @Router /api/reviews/{id} [get]
 func (h *ReviewHandler) GetOwnReview(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -85,6 +120,20 @@ func (h *ReviewHandler) GetOwnReview(c *gin.Context) {
 	c.JSON(http.StatusOK, reviewResponse)
 }
 
+// UpdateReview godoc
+// @Summary Update own review
+// @Description Update a review by ID owned by the authenticated user
+// @Tags Review
+// @Accept json
+// @Produce json
+// @Param id path int true "Review ID"
+// @Param body body ReviewRequest true "Updated review payload"
+// @Success 200 {object} responses.ReviewResponse
+// @Failure 400 {object} map[string]string "Invalid input or review ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Update failed"
+// @Security ApiKeyAuth
+// @Router /api/reviews/{id} [put]
 func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -110,6 +159,18 @@ func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 	c.JSON(http.StatusOK, reviewResponse)
 }
 
+// DeleteReview godoc
+// @Summary Delete own review
+// @Description Delete a review by ID owned by the authenticated user
+// @Tags Review
+// @Produce json
+// @Param id path int true "Review ID"
+// @Success 200 {object} map[string]string "Delete success message"
+// @Failure 400 {object} map[string]string "Invalid review ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Delete failed"
+// @Security ApiKeyAuth
+// @Router /api/reviews/{id} [delete]
 func (h *ReviewHandler) DeleteReview(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
