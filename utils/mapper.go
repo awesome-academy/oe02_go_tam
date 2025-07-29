@@ -59,3 +59,15 @@ func MapCommentToResponse(c models.Comment) responses.CommentResponse {
 		Content: c.Content,
 	}
 }
+
+func MapBookingToResponse(b models.Booking) responses.BookingResponse {
+	return responses.BookingResponse{
+		ID:            b.ID,
+		UserID:        b.UserID,
+		TourID:        b.TourID,
+		Status:        b.Status,
+		NumberOfSeats: b.NumberOfSeats,
+		TotalPrice:    b.TotalPrice,
+		BookingDate:   b.BookingDate,
+	}
+}

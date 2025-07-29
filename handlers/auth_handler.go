@@ -28,6 +28,15 @@ func NewAuthHandler(s services.AuthService) *AuthHandler {
 	return &AuthHandler{s}
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body RegisterRequest true "Register payload"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /api/auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,6 +62,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	})
 }
 
+// Login godoc
+// @Summary Login with email and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param body body LoginRequest true "Login payload"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /api/auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -76,6 +95,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	})
 }
 
+// Logout godoc
+// @Summary Logout the user (frontend discards token)
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /api/auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	// Frontend should discard token
 	c.JSON(http.StatusOK, gin.H{
@@ -83,6 +108,14 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	})
 }
 
+// GoogleCallback godoc
+// @Summary Google OAuth2 login callback
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/google/callback [get]
 func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	googleUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {

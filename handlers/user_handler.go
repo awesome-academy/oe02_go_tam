@@ -24,9 +24,19 @@ type UserResponse struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
+// GetProfile godoc
+// @Summary Get current user's profile
+// @Description Retrieve the authenticated user's profile details
+// @Tags User
+// @Produce json
+// @Success 200 {object} handlers.UserResponse
+// @Failure 400 {object} map[string]string "Invalid user ID format"
+// @Failure 404 {object} map[string]string "User not found"
+// @Security ApiKeyAuth
+// @Router /api/user/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	userIDVal, _ := c.Get("user_id")
-	
+
 	userID, ok := userIDVal.(uint)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
@@ -54,6 +64,19 @@ type UpdateProfileRequest struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
+// UpdateProfile godoc
+// @Summary Update current user's profile
+// @Description Update the authenticated user's name and avatar
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param body body handlers.UpdateProfileRequest true "Profile update payload"
+// @Success 200 {object} handlers.UserResponse
+// @Failure 400 {object} map[string]string "Invalid input or user ID format"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Security ApiKeyAuth
+// @Router /api/user/profile [put]
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	userIDVal, _ := c.Get("user_id")
 

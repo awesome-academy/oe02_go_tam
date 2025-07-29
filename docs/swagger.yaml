@@ -1,0 +1,919 @@
+definitions:
+  handlers.BookTourRequest:
+    properties:
+      number_of_seats:
+        type: integer
+      tour_id:
+        type: integer
+    required:
+    - number_of_seats
+    - tour_id
+    type: object
+  handlers.CreateCommentRequest:
+    properties:
+      content:
+        type: string
+      parent_id:
+        type: integer
+      review_id:
+        type: integer
+    required:
+    - content
+    - review_id
+    type: object
+  handlers.LikeRequest:
+    properties:
+      review_id:
+        type: integer
+    required:
+    - review_id
+    type: object
+  handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.RegisterRequest:
+    properties:
+      confirm_password:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - confirm_password
+    - email
+    - name
+    - password
+    type: object
+  handlers.ReviewRequest:
+    properties:
+      content:
+        type: string
+      rating:
+        type: integer
+      tour_id:
+        type: integer
+    required:
+    - content
+    - rating
+    - tour_id
+    type: object
+  handlers.TourDetailResponse:
+    properties:
+      bookings:
+        items:
+          $ref: '#/definitions/responses.BookingResponse'
+        type: array
+      created_by:
+        type: integer
+      creator:
+        properties:
+          email:
+            type: string
+          id:
+            type: integer
+          name:
+            type: string
+        type: object
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      price:
+        type: number
+      reviews:
+        items:
+          $ref: '#/definitions/responses.ReviewResponse'
+        type: array
+      seats:
+        type: integer
+      start_date:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.TourListResponse:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      location:
+        type: string
+      price:
+        type: number
+      seats:
+        type: integer
+      start_date:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.UpdateProfileRequest:
+    properties:
+      avatar_url:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  responses.BookingResponse:
+    properties:
+      booking_date:
+        type: string
+      id:
+        type: integer
+      number_of_seats:
+        type: integer
+      status:
+        type: string
+      total_price:
+        type: number
+      tour_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  responses.CommentResponse:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      user:
+        $ref: '#/definitions/responses.UserMiniResponse'
+    type: object
+  responses.LikeResponse:
+    properties:
+      id:
+        type: integer
+      user:
+        $ref: '#/definitions/responses.UserMiniResponse'
+    type: object
+  responses.ReviewResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/responses.CommentResponse'
+        type: array
+      content:
+        type: string
+      id:
+        type: integer
+      likes:
+        items:
+          $ref: '#/definitions/responses.LikeResponse'
+        type: array
+      rating:
+        type: integer
+      user:
+        $ref: '#/definitions/responses.UserMiniResponse'
+    type: object
+  responses.UserMiniResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/auth/google/callback:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth2 login callback
+      tags:
+      - Auth
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login with email and password
+      tags:
+      - Auth
+  /api/auth/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout the user (frontend discards token)
+      tags:
+      - Auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Register payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+  /api/bookings:
+    post:
+      consumes:
+      - application/json
+      description: Book a tour with a given number of seats
+      parameters:
+      - description: Booking request payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.BookTourRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Booking created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request or not enough seats or already booked
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tour not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Book a tour
+      tags:
+      - Booking
+  /api/bookings/{id}/cancel:
+    post:
+      description: Cancel a booking by ID for the authenticated user
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking cancelled successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid booking ID or already cancelled
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Booking not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Cancel a booking
+      tags:
+      - Booking
+  /api/comments:
+    post:
+      consumes:
+      - application/json
+      description: Create a comment or reply (nested) on a review. ParentID is optional
+        for nested comments.
+      parameters:
+      - description: Create Comment Payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns the created comment data
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request, invalid input or empty content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized (user not logged in)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Review or Parent comment not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new comment for a review
+      tags:
+      - Comment
+  /api/likes:
+    post:
+      consumes:
+      - application/json
+      description: Like a review by review ID. User can only like once.
+      parameters:
+      - description: Like Review Payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LikeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Like success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request or already liked
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized (user not logged in)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Review not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Like a review
+      tags:
+      - Like
+  /api/payment/create-url:
+    get:
+      description: Generates a VNPAY payment URL for a given booking
+      parameters:
+      - description: Booking ID
+        in: query
+        name: booking_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: payment_url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid booking ID or payment generation failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create VNPAY payment URL
+      tags:
+      - Payment
+  /api/payment/vnpay-return:
+    get:
+      description: Callback endpoint for VNPAY to update transaction status
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to frontend after successful payment
+          schema:
+            type: string
+        "400":
+          description: Invalid signature or failed payment
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Transaction or booking not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update booking
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: VNPAY return callback
+      tags:
+      - Payment
+  /api/reviews:
+    post:
+      consumes:
+      - application/json
+      description: Create a review for a tour. Requires authentication.
+      parameters:
+      - description: Review payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.ReviewResponse'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Create review failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new review
+      tags:
+      - Review
+  /api/reviews/{id}:
+    delete:
+      description: Delete a review by ID owned by the authenticated user
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Delete success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid review ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Delete failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete own review
+      tags:
+      - Review
+    get:
+      description: Get the review written by the authenticated user by review ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.ReviewResponse'
+        "400":
+          description: Invalid review ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Review not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get own review by ID
+      tags:
+      - Review
+    put:
+      consumes:
+      - application/json
+      description: Update a review by ID owned by the authenticated user
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated review payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.ReviewResponse'
+        "400":
+          description: Invalid input or review ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Update failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update own review
+      tags:
+      - Review
+  /api/tours:
+    get:
+      description: 'Retrieve all tours with optional filters: title, location, start_after,
+        end_before, min_price, max_price'
+      parameters:
+      - description: Filter by title
+        in: query
+        name: title
+        type: string
+      - description: Filter by location
+        in: query
+        name: location
+        type: string
+      - description: Filter tours starting after this date (YYYY-MM-DD)
+        in: query
+        name: start_after
+        type: string
+      - description: Filter tours ending before this date (YYYY-MM-DD)
+        in: query
+        name: end_before
+        type: string
+      - description: Minimum price
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum price
+        in: query
+        name: max_price
+        type: number
+      - description: Page number (default is 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size (default is 10)
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.TourListResponse'
+            type: array
+        "500":
+          description: Failed to fetch tours
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all tours with optional filters and pagination
+      tags:
+      - Tour
+  /api/tours/{id}:
+    get:
+      description: Retrieve full details of a tour including bookings and reviews
+      parameters:
+      - description: Tour ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TourDetailResponse'
+        "400":
+          description: Invalid tour ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Tour not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get detailed information about a tour
+      tags:
+      - Tour
+  /api/tours/{id}/reviews:
+    get:
+      description: Retrieve all reviews of a specific tour by tour ID
+      parameters:
+      - description: Tour ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.ReviewResponse'
+            type: array
+        "400":
+          description: Invalid tour ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to fetch reviews
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get reviews for a tour
+      tags:
+      - Review
+  /api/user/profile:
+    get:
+      description: Retrieve the authenticated user's profile details
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: Invalid user ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user's profile
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's name and avatar
+      parameters:
+      - description: Profile update payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: Invalid input or user ID format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update current user's profile
+      tags:
+      - User
+swagger: "2.0"

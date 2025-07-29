@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"oe02_go_tam/constant"
-	"oe02_go_tam/models"
 	"oe02_go_tam/responses"
 	"oe02_go_tam/services"
 	"oe02_go_tam/utils"
@@ -73,10 +72,26 @@ type TourDetailResponse struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`
 	} `json:"creator"`
-	Bookings []models.Booking           `json:"bookings"`
-	Reviews  []responses.ReviewResponse `json:"reviews"`
+	Bookings []responses.BookingResponse `json:"bookings"`
+	Reviews  []responses.ReviewResponse  `json:"reviews"`
 }
 
+// ListTours godoc
+// @Summary List all tours with optional filters and pagination
+// @Description Retrieve all tours with optional filters: title, location, start_after, end_before, min_price, max_price
+// @Tags Tour
+// @Produce json
+// @Param title query string false "Filter by title"
+// @Param location query string false "Filter by location"
+// @Param start_after query string false "Filter tours starting after this date (YYYY-MM-DD)"
+// @Param end_before query string false "Filter tours ending before this date (YYYY-MM-DD)"
+// @Param min_price query number false "Minimum price"
+// @Param max_price query number false "Maximum price"
+// @Param page query int false "Page number (default is 1)"
+// @Param size query int false "Page size (default is 10)"
+// @Success 200 {array} handlers.TourListResponse
+// @Failure 500 {object} map[string]string "Failed to fetch tours"
+// @Router /api/tours [get]
 func (h *TourHandler) ListTours(c *gin.Context) {
 	filters := map[string]string{
 		"title":       c.Query("title"),
@@ -112,6 +127,16 @@ func (h *TourHandler) ListTours(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// GetTourDetail godoc
+// @Summary Get detailed information about a tour
+// @Description Retrieve full details of a tour including bookings and reviews
+// @Tags Tour
+// @Produce json
+// @Param id path int true "Tour ID"
+// @Success 200 {object} handlers.TourDetailResponse
+// @Failure 400 {object} map[string]string "Invalid tour ID"
+// @Failure 404 {object} map[string]string "Tour not found"
+// @Router /api/tours/{id} [get]
 func (h *TourHandler) GetTourDetail(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -141,7 +166,9 @@ func (h *TourHandler) GetTourDetail(c *gin.Context) {
 	resp.Creator.Name = tour.Creator.Name
 	resp.Creator.Email = tour.Creator.Email
 
-	resp.Bookings = tour.Bookings
+	for _, b := range tour.Bookings {
+		resp.Bookings = append(resp.Bookings, utils.MapBookingToResponse(b))
+	}
 
 	for _, r := range tour.Reviews {
 		resp.Reviews = append(resp.Reviews, utils.MapReviewToResponse(r))
