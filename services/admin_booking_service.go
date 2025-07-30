@@ -10,6 +10,7 @@ type AdminBookingService interface {
 	GetAllBookings(search string, page, limit int) ([]models.Booking, int64, error)
 	GetBookingByID(id uint) (*models.Booking, error)
 	DeleteBooking(id uint) error
+	CancelBooking(id uint) error
 }
 
 type adminBookingServiceImpl struct {
@@ -37,4 +38,8 @@ func (s *adminBookingServiceImpl) GetBookingByID(id uint) (*models.Booking, erro
 
 func (s *adminBookingServiceImpl) DeleteBooking(id uint) error {
 	return s.repo.Delete(id)
+}
+
+func (s *adminBookingServiceImpl) CancelBooking(id uint) error {
+	return s.repo.CancelBooking(id)
 }

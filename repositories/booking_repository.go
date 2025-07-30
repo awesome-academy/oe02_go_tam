@@ -18,6 +18,7 @@ type BookingRepository interface {
 	FindByIDWithUserAndTour(id uint) (*models.Booking, error)
 	Delete(id uint) error
 	GetCompletedBookings(search string, page, limit, month, year int) ([]models.Booking, int64, error)
+	CancelBooking(id uint) error
 }
 
 type bookingRepositoryImpl struct {
@@ -140,4 +141,10 @@ func (r *bookingRepositoryImpl) GetCompletedBookings(search string, page, limit,
 	offset := (page - 1) * limit
 	err = query.Offset(offset).Limit(limit).Order("booking_date DESC").Find(&bookings).Error
 	return bookings, total, err
+}
+
+func (r *bookingRepositoryImpl) CancelBooking(id uint) error {
+	return r.db.Model(&models.Booking{}).
+		Where("id = ?", id).
+		Update("status", constant.BookingStatusCancelled).Error
 }
