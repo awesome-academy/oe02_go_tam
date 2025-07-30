@@ -66,6 +66,21 @@
             <a href="?page={{inc .Pagination.Page}}&limit={{.Pagination.Limit}}&search={{.Search}}" class="text-sm text-blue-500 hover:underline">{{ T "admin.revenue.pagination.next" }}</a>
             {{end}}
         </div>
+
+        <!-- Chart -->
+        <script src="/static/js/chart.umd.js"></script>
+        <script>
+            window.revenueLabels = [{{range .MonthlyRevenue}}{{.Month}},{{end}}];
+            window.revenueData = [{{range .MonthlyRevenue}}{{printf "%.2f" .Total}},{{end}}];
+        </script>
+        <script src="/static/js/revenue_chart.js"></script>
+
+        <link rel="stylesheet" href="/static/css/revenue.css">
+
+        <div class="my-6 bg-white p-4 rounded-xl shadow revenue-container">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">{{ T "admin.revenue.chart_title" }}</h2>
+            <canvas id="revenueChart"></canvas>
+        </div>
     </div>
 </div>
 </body>

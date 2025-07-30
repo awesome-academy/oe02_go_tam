@@ -7,6 +7,7 @@ import (
 
 type AdminRevenueService interface {
 	ListRevenue(search string, page, limit, month, year int) ([]models.Booking, int64, error)
+	GetMonthlyRevenue(year int) ([]repositories.MonthlyRevenue, error)
 }
 
 type adminRevenueServiceImpl struct {
@@ -19,4 +20,8 @@ func NewAdminRevenueService(repo repositories.BookingRepository) AdminRevenueSer
 
 func (s *adminRevenueServiceImpl) ListRevenue(search string, page, limit, month, year int) ([]models.Booking, int64, error) {
 	return s.repo.GetCompletedBookings(search, page, limit, month, year)
+}
+
+func (s *adminRevenueServiceImpl) GetMonthlyRevenue(year int) ([]repositories.MonthlyRevenue, error) {
+	return s.repo.GetMonthlyRevenue(year)
 }

@@ -19,6 +19,7 @@ type BookingRepository interface {
 	Delete(id uint) error
 	GetCompletedBookings(search string, page, limit, month, year int) ([]models.Booking, int64, error)
 	CancelBooking(id uint) error
+	GetMonthlyRevenue(year int) ([]MonthlyRevenue, error)
 }
 
 type bookingRepositoryImpl struct {
@@ -147,4 +148,21 @@ func (r *bookingRepositoryImpl) CancelBooking(id uint) error {
 	return r.db.Model(&models.Booking{}).
 		Where("id = ?", id).
 		Update("status", constant.BookingStatusCancelled).Error
+}
+
+type MonthlyRevenue struct {
+	Month int
+	Total float64
+}
+
+func (r *bookingRepositoryImpl) GetMonthlyRevenue(year int) ([]MonthlyRevenue, error) {
+	var result []MonthlyRevenue
+	err := r.db.
+		Model(&models.Booking{}).
+		Select("MONTH(booking_date) as month, SUM(total_price) as total").
+		Where("YEAR(booking_date) = ? AND status = ?", year, constant.BookingStatusCompleted).
+		Group("MONTH(booking_date)").
+		Order("month").
+		Scan(&result).Error
+	return result, err
 }
