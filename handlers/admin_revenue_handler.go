@@ -26,7 +26,13 @@ func (h *AdminRevenueHandler) ListRevenue(c *gin.Context) {
 
 	bookings, total, err := h.service.ListRevenue(search, page, limit, month, year)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, constant.TemplateError, gin.H{"error": "Failed to load revenue", "Title": constant.T("error.title")})
+		c.HTML(http.StatusInternalServerError, constant.TemplateError, gin.H{"error": constant.T("admin.revenue.error.load"), "Title": constant.T("error.title")})
+		return
+	}
+
+	monthlyRevenue, err := h.service.GetMonthlyRevenue(year)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, constant.TemplateError, gin.H{"error": constant.T("admin.revenue.error.chart"), "Title": constant.T("error.title")})
 		return
 	}
 
@@ -40,9 +46,10 @@ func (h *AdminRevenueHandler) ListRevenue(c *gin.Context) {
 			"Limit":      limit,
 			"TotalPages": totalPages,
 		},
-		"Month":       month,
-		"Year":        year,
-		"CurrentPage": constant.T("admin.revenue.current_page"),
-		"Title":       constant.T("admin.revenue.title"),
+		"Month":          month,
+		"Year":           year,
+		"MonthlyRevenue": monthlyRevenue,
+		"CurrentPage":    constant.T("admin.revenue.current_page"),
+		"Title":          constant.T("admin.revenue.title"),
 	})
 }

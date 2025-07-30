@@ -14,7 +14,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	//r.LoadHTMLGlob("templates/*.html")
+	r.Static("/static", "./static")
 	utils.LoadTemplates(r)
 
 	authRepository := repositories.NewAuthRepository(database.DB)
