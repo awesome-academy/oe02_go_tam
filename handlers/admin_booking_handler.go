@@ -82,3 +82,26 @@ func (h *AdminBookingHandler) DeleteBooking(c *gin.Context) {
 
 	c.Redirect(http.StatusSeeOther, "/admin/bookings")
 }
+
+func (h *AdminBookingHandler) CancelBooking(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.HTML(http.StatusBadRequest, constant.TemplateError, gin.H{
+			"error": constant.T("admin.booking.error.invalid_id"),
+			"Title": constant.T("error.title"),
+		})
+		return
+	}
+
+	err = h.service.CancelBooking(uint(id))
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, constant.TemplateError, gin.H{
+			"error": constant.T("admin.booking.error.cancel"),
+			"Title": constant.T("error.title"),
+		})
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, "/admin/bookings")
+}

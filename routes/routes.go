@@ -92,6 +92,7 @@ func SetupRouter() *gin.Engine {
 	adminGroup.GET("/bookings", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminBookingHandler.ListBookings)
 	adminGroup.GET("/bookings/:id", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminBookingHandler.ShowBookingDetail)
 	adminGroup.GET("/bookings/:id/delete", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminBookingHandler.DeleteBooking)
+	adminGroup.GET("/bookings/:id/cancel", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminBookingHandler.CancelBooking)
 	adminGroup.GET("/reviews", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminReviewHandler.ListReviews)
 	adminGroup.GET("/reviews/:id", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminReviewHandler.ShowReviewDetail)
 	adminGroup.GET("/reviews/:id/delete", middlewares.AuthMiddleware(), middlewares.RequireRole("admin"), adminReviewHandler.DeleteReview)
