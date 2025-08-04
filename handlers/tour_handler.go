@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"oe02_go_tam/constant"
+	"oe02_go_tam/models"
 	"oe02_go_tam/responses"
 	"oe02_go_tam/services"
 	"oe02_go_tam/utils"
@@ -72,8 +73,7 @@ type TourDetailResponse struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`
 	} `json:"creator"`
-	Bookings []responses.BookingResponse `json:"bookings"`
-	Reviews  []responses.ReviewResponse  `json:"reviews"`
+	Reviews []responses.ReviewResponse `json:"reviews"`
 }
 
 // ListTours godoc
@@ -107,7 +107,7 @@ func (h *TourHandler) ListTours(c *gin.Context) {
 
 	tours, err := h.service.ListToursWithFilters(filters, page, size)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("tour.fetch_failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("tour.fetch_failed"), "data": models.Tour{}})
 		return
 	}
 
@@ -124,7 +124,7 @@ func (h *TourHandler) ListTours(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, gin.H{"message": constant.T("tour.list_success"), "data": resp})
 }
 
 // GetTourDetail godoc
@@ -141,13 +141,13 @@ func (h *TourHandler) GetTourDetail(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("tour.id_invalid")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("tour.id_invalid"), "data": []interface{}{}})
 		return
 	}
 
 	tour, err := h.service.GetTourDetail(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("tour.not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("tour.not_found"), "data": []interface{}{}})
 		return
 	}
 
@@ -166,13 +166,9 @@ func (h *TourHandler) GetTourDetail(c *gin.Context) {
 	resp.Creator.Name = tour.Creator.Name
 	resp.Creator.Email = tour.Creator.Email
 
-	for _, b := range tour.Bookings {
-		resp.Bookings = append(resp.Bookings, utils.MapBookingToResponse(b))
-	}
-
 	for _, r := range tour.Reviews {
 		resp.Reviews = append(resp.Reviews, utils.MapReviewToResponse(r))
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, gin.H{"message": constant.T("tour.get_success"), "data": resp})
 }

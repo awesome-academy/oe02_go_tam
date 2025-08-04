@@ -38,19 +38,19 @@ type BookTourRequest struct {
 func (h *BookingHandler) BookTour(c *gin.Context) {
 	var req BookTourRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
 		return
 	}
 
 	val, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": constant.T("auth.unauthorized")})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.T("auth.unauthorized"), "data": []interface{}{}})
 		return
 	}
 
 	userID, ok := val.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("auth.user_id.invalid")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("auth.user_id.invalid"), "data": []interface{}{}})
 		return
 	}
 
@@ -58,21 +58,24 @@ func (h *BookingHandler) BookTour(c *gin.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusCreated, gin.H{
-			"booking_id":      booking.ID,
-			"tour_id":         booking.TourID,
-			"number_of_seats": booking.NumberOfSeats,
-			"total_price":     booking.TotalPrice,
-			"status":          booking.Status,
-			"booking_date":    booking.BookingDate,
+			"message": constant.T("booking.create.success"),
+			"data": gin.H{
+				"booking_id":      booking.ID,
+				"tour_id":         booking.TourID,
+				"number_of_seats": booking.NumberOfSeats,
+				"total_price":     booking.TotalPrice,
+				"status":          booking.Status,
+				"booking_date":    booking.BookingDate,
+			},
 		})
 	case constant.ErrTourNotFound:
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("booking.error.tour_not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("booking.error.tour_not_found"), "data": []interface{}{}})
 	case constant.ErrNotEnoughSeats:
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("booking.error.not_enough_seats")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("booking.error.not_enough_seats"), "data": []interface{}{}})
 	case constant.ErrAlreadyBooked:
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("booking.error.already_booked")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("booking.error.already_booked"), "data": []interface{}{}})
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("booking.error.failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("booking.error.failed"), "data": []interface{}{}})
 	}
 }
 
@@ -93,31 +96,31 @@ func (h *BookingHandler) CancelBooking(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("booking.error.invalid_id")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("booking.error.invalid_id"), "data": []interface{}{}})
 		return
 	}
 
 	val, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": constant.T("auth.unauthorized")})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.T("auth.unauthorized"), "data": []interface{}{}})
 		return
 	}
 
 	userID, ok := val.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("auth.user_id.invalid")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("auth.user_id.invalid"), "data": []interface{}{}})
 		return
 	}
 
 	err = h.service.CancelBooking(userID, uint(id))
 	switch err {
 	case nil:
-		c.JSON(http.StatusOK, gin.H{"message": constant.T("booking.cancel.success")})
+		c.JSON(http.StatusOK, gin.H{"message": constant.T("booking.cancel.success"), "data": []interface{}{}})
 	case constant.ErrBookingNotFound:
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("booking.error.not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("booking.error.not_found"), "data": []interface{}{}})
 	case constant.ErrAlreadyCancelled:
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("booking.error.already_cancelled")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("booking.error.already_cancelled"), "data": []interface{}{}})
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("booking.error.failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("booking.error.failed"), "data": []interface{}{}})
 	}
 }
