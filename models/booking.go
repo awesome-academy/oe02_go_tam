@@ -13,6 +13,8 @@ type Booking struct {
 	NumberOfSeats int       `json:"number_of_seats"`
 	TotalPrice    float64   `gorm:"type:decimal(10,2)" json:"total_price"`
 	BookingDate   time.Time `json:"booking_date"`
+	StartTime     time.Time `json:"start_time"`
+	EndTime       time.Time `json:"end_time"`
 
 	User User `gorm:"foreignKey:UserID" json:"user"`
 	Tour Tour `gorm:"foreignKey:TourID" json:"tour"`

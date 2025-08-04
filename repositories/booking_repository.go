@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"oe02_go_tam/constant"
 	"oe02_go_tam/models"
+	"time"
 )
 
 type BookingRepository interface {
@@ -12,7 +13,7 @@ type BookingRepository interface {
 	FindByUserAndTour(userID, tourID uint) (*models.Booking, error)
 	Update(booking *models.Booking) error
 	GetByIDAndUser(id, userID uint) (*models.Booking, error)
-	TotalBookedSeats(tourID uint) (int, error)
+	TotalBookedSeats(tourID uint, startTime, endTime time.Time) (int, error)
 	GetByID(bookingID uint) (*models.Booking, error)
 	FindAllWithUserAndTour(search string, page, limit int) ([]models.Booking, int64, error)
 	FindByIDWithUserAndTour(id uint) (*models.Booking, error)
@@ -36,7 +37,7 @@ func (r *bookingRepositoryImpl) Create(booking *models.Booking) error {
 
 func (r *bookingRepositoryImpl) FindByUserAndTour(userID, tourID uint) (*models.Booking, error) {
 	var b models.Booking
-	err := r.db.Where("user_id = ? AND tour_id = ? AND status != ?", userID, tourID, constant.BookingStatusCancelled).First(&b).Error
+	err := r.db.Where("user_id = ? AND tour_id = ? AND status = ?", userID, tourID, constant.BookingStatusPending).First(&b).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
@@ -55,10 +56,10 @@ func (r *bookingRepositoryImpl) GetByIDAndUser(id, userID uint) (*models.Booking
 	return &b, err
 }
 
-func (r *bookingRepositoryImpl) TotalBookedSeats(tourID uint) (int, error) {
+func (r *bookingRepositoryImpl) TotalBookedSeats(tourID uint, startTime, endTime time.Time) (int, error) {
 	var total int64
 	err := r.db.Model(&models.Booking{}).
-		Where("tour_id = ? AND status != ?", tourID, constant.BookingStatusCancelled).
+		Where("tour_id = ? AND status != ? AND start_time = ? AND end_time = ?", tourID, constant.BookingStatusCancelled, startTime, endTime).
 		Select("COALESCE(SUM(number_of_seats), 0)").
 		Scan(&total).Error
 

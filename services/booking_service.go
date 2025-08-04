@@ -8,7 +8,7 @@ import (
 )
 
 type BookingService interface {
-	BookTour(userID, tourID uint, numberOfSeats int) (*models.Booking, error)
+	BookTour(userID, tourID uint, numberOfSeats int, startTime, endTime time.Time) (*models.Booking, error)
 	CancelBooking(userID, bookingID uint) error
 }
 
@@ -21,7 +21,7 @@ func NewBookingService(br repositories.BookingRepository, tr repositories.TourRe
 	return &bookingServiceImpl{br, tr}
 }
 
-func (s *bookingServiceImpl) BookTour(userID, tourID uint, seats int) (*models.Booking, error) {
+func (s *bookingServiceImpl) BookTour(userID, tourID uint, seats int, startTime, endTime time.Time) (*models.Booking, error) {
 	tour, err := s.tourRepo.GetByID(tourID)
 	if err != nil {
 		return nil, constant.ErrTourNotFound
@@ -36,7 +36,7 @@ func (s *bookingServiceImpl) BookTour(userID, tourID uint, seats int) (*models.B
 		return nil, constant.ErrAlreadyBooked
 	}
 
-	totalBooked, err := s.bookingRepo.TotalBookedSeats(tourID)
+	totalBooked, err := s.bookingRepo.TotalBookedSeats(tourID, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +54,8 @@ func (s *bookingServiceImpl) BookTour(userID, tourID uint, seats int) (*models.B
 		NumberOfSeats: seats,
 		TotalPrice:    total,
 		BookingDate:   time.Now(),
+		StartTime:     startTime,
+		EndTime:       endTime,
 	}
 
 	if err := s.bookingRepo.Create(booking); err != nil {
