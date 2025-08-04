@@ -36,30 +36,30 @@ func NewLikeHandler(service services.LikeService) *LikeHandler {
 func (h *LikeHandler) LikeReview(c *gin.Context) {
 	var req LikeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
 		return
 	}
 
 	userIDAny, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.T("auth.unauthorized"), "data": []interface{}{}})
 		return
 	}
 	userID, ok := userIDAny.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user id type"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("auth.user_id.invalid"), "data": []interface{}{}})
 		return
 	}
 
 	err := h.service.LikeReview(userID, req.ReviewID)
 	switch err {
 	case nil:
-		c.JSON(http.StatusOK, gin.H{"message": constant.T("like.review.success")})
+		c.JSON(http.StatusOK, gin.H{"message": constant.T("like.review.success"), "data": []interface{}{}})
 	case constant.ErrReviewNotFound:
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("like.review.not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("like.review.not_found"), "data": []interface{}{}})
 	case constant.ErrAlreadyLiked:
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("like.review.already_liked")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("like.review.already_liked"), "data": []interface{}{}})
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("like.review.failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("like.review.failed"), "data": []interface{}{}})
 	}
 }

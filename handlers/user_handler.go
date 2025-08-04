@@ -39,13 +39,13 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 	userID, ok := userIDVal.(uint)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("user.invalid_id_format"), "data": []interface{}{}})
 		return
 	}
 
 	user, err := h.service.GetProfile(userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("user.not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("user.not_found"), "data": []interface{}{}})
 		return
 	}
 
@@ -56,7 +56,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		AvatarURL: user.AvatarURL,
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, gin.H{"message": constant.T("user.get_success"), "data": resp})
 }
 
 type UpdateProfileRequest struct {
@@ -82,24 +82,24 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	userID, ok := userIDVal.(uint)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("user.invalid_id_format"), "data": []interface{}{}})
 		return
 	}
 
 	var req UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
 		return
 	}
 
 	user, err := h.service.UpdateProfile(userID, req.Name, req.AvatarURL)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.JSON(http.StatusNotFound, gin.H{"message": constant.T("user.not_found"), "data": []interface{}{}})
 		} else if errors.Is(err, constant.ErrValidation) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("user_update_failed"), "data": []interface{}{}})
 		}
 		return
 	}
@@ -111,5 +111,5 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		AvatarURL: user.AvatarURL,
 	}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, gin.H{"message": constant.T("user.update_success"), "data": resp})
 }

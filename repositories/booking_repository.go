@@ -59,8 +59,14 @@ func (r *bookingRepositoryImpl) TotalBookedSeats(tourID uint) (int, error) {
 	var total int64
 	err := r.db.Model(&models.Booking{}).
 		Where("tour_id = ? AND status != ?", tourID, constant.BookingStatusCancelled).
-		Select("SUM(number_of_seats)").Scan(&total).Error
-	return int(total), err
+		Select("COALESCE(SUM(number_of_seats), 0)").
+		Scan(&total).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int(total), nil
 }
 
 func (r *bookingRepositoryImpl) GetByID(bookingID uint) (*models.Booking, error) {

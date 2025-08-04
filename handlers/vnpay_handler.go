@@ -30,7 +30,7 @@ func NewVnpayHandler(service services.VnpayService) *VnpayHandler {
 func (h *VnpayHandler) CreatePaymentUrl(c *gin.Context) {
 	bookingID, err := strconv.Atoi(c.Query("booking_id"))
 	if err != nil || bookingID <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("vnpay.invalid_booking_id")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("vnpay.invalid_booking_id"), "data": []interface{}{}})
 		return
 	}
 	userID := c.GetUint("user_id")
@@ -38,7 +38,7 @@ func (h *VnpayHandler) CreatePaymentUrl(c *gin.Context) {
 
 	url, err := h.service.CreatePaymentUrlFromBooking(userID, uint(bookingID), clientIP)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *VnpayHandler) VnpayReturn(c *gin.Context) {
 	params := c.Request.URL.Query()
 
 	if !utils.VerifyVnpSignature(params, h.service.GetHashSecret()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("vnpay.invalid_signature")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("vnpay.invalid_signature"), "data": []interface{}{}})
 		return
 	}
 
@@ -71,26 +71,26 @@ func (h *VnpayHandler) VnpayReturn(c *gin.Context) {
 			_ = h.service.UpdateTransaction(tx)
 		}
 
-		c.JSON(http.StatusBadRequest, gin.H{"error": constant.T("vnpay.payment_failed")})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("vnpay.payment_failed"), "data": []interface{}{}})
 		return
 	}
 
 	txnRef := params.Get("vnp_TxnRef")
 	tx, err := h.service.GetTransactionByTxnRef(txnRef)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("vnpay.transaction_not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("vnpay.transaction_not_found"), "data": []interface{}{}})
 		return
 	}
 
 	booking, err := h.service.FindPendingBookingByID(uint(tx.BookingID))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("vnpay.booking_not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("vnpay.booking_not_found"), "data": []interface{}{}})
 		return
 	}
 
 	booking.Status = constant.BookingStatusCompleted
 	if err := h.service.UpdateBooking(booking); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("vnpay.update_booking_failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("vnpay.update_booking_failed"), "data": []interface{}{}})
 		return
 	}
 

@@ -41,23 +41,23 @@ func NewCommentHandler(service services.CommentService) *CommentHandler {
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var req CreateCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "data": []interface{}{}})
 		return
 	}
 
 	if strings.TrimSpace(req.Content) == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "content must not be empty or whitespace"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": constant.T("comment.content_empty"), "data": []interface{}{}})
 		return
 	}
 
 	userIDAny, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": constant.T("auth.unauthorized"), "data": []interface{}{}})
 		return
 	}
 	userID, ok := userIDAny.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user id type"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("auth.user_id.invalid"), "data": []interface{}{}})
 		return
 	}
 
@@ -72,12 +72,12 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	switch err {
 	case nil:
 		response := utils.MapCommentToResponse(*comment)
-		c.JSON(http.StatusCreated, gin.H{"data": response})
+		c.JSON(http.StatusCreated, gin.H{"message": constant.T("comment.create.success"), "data": response})
 	case constant.ErrReviewNotFound:
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("comment.create.review_not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("comment.create.review_not_found"), "data": []interface{}{}})
 	case constant.ErrParentCommentNotFound:
-		c.JSON(http.StatusNotFound, gin.H{"error": constant.T("comment.create.parent_not_found")})
+		c.JSON(http.StatusNotFound, gin.H{"message": constant.T("comment.create.parent_not_found"), "data": []interface{}{}})
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": constant.T("comment.create.failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": constant.T("comment.create.failed"), "data": []interface{}{}})
 	}
 }
