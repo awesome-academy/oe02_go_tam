@@ -6,6 +6,7 @@ import (
 	"oe02_go_tam/constant"
 	"oe02_go_tam/services"
 	"strconv"
+	"time"
 )
 
 type BookingHandler struct {
@@ -17,8 +18,10 @@ func NewBookingHandler(service services.BookingService) *BookingHandler {
 }
 
 type BookTourRequest struct {
-	TourID        uint `json:"tour_id" binding:"required"`
-	NumberOfSeats int  `json:"number_of_seats" binding:"required"`
+	TourID        uint      `json:"tour_id" binding:"required"`
+	NumberOfSeats int       `json:"number_of_seats" binding:"required"`
+	StartTime     time.Time `json:"start_time" binding:"required"`
+	EndTime       time.Time `json:"end_time" binding:"required"`
 }
 
 // BookTour godoc
@@ -54,7 +57,7 @@ func (h *BookingHandler) BookTour(c *gin.Context) {
 		return
 	}
 
-	booking, err := h.service.BookTour(userID, req.TourID, req.NumberOfSeats)
+	booking, err := h.service.BookTour(userID, req.TourID, req.NumberOfSeats, req.StartTime, req.EndTime)
 	switch err {
 	case nil:
 		c.JSON(http.StatusCreated, gin.H{
@@ -66,6 +69,8 @@ func (h *BookingHandler) BookTour(c *gin.Context) {
 				"total_price":     booking.TotalPrice,
 				"status":          booking.Status,
 				"booking_date":    booking.BookingDate,
+				"start_time":      booking.StartTime,
+				"end_time":        booking.EndTime,
 			},
 		})
 	case constant.ErrTourNotFound:
